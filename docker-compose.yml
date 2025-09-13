@@ -1,0 +1,33 @@
+services:
+  web:
+    build: .
+    command: gunicorn plataform_back.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    env_file:
+      - .env
+    ports:
+      - "5434:5432"  # Cambiado para no chocar con Postgres local
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Opcional, para extensiones
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
